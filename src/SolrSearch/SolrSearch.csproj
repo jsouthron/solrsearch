@@ -50,7 +50,7 @@
     <Compile Include="SolrQuery\SolrExtensionMethods.cs" />
     <Compile Include="SolrQuery\SolrField.cs" />
     <Compile Include="SolrQuery\SolrMath.cs" />
-    <Compile Include="SolrQuery\SolrQuery.cs" />
+    <Compile Include="SolrQuery\Fluent\SolrQuery.cs" />
     <Compile Include="SolrQuery\SolrQueryResult.cs" />
   </ItemGroup>
   <ItemGroup>

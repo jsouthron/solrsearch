@@ -1,26 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SolrSearch.SolrQuery
+﻿namespace SolrSearch.SolrQuery.Fluent
 {
-    public class SolrQuery
-    {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
-        private string _version = "version=2.2";
-        private string _defaultOperation = "/select?";
+    public class FluentSolrQuery
+    {
+        private const string _version = "version=2.2";
+        private const string _defaultOperation = "/select?";
 
         //Replaced for a better synonym Searcher"defType=dismax";
-        private string _deftype = "defType=synonym_edismax"; 
+        private const string _deftype = "defType=synonym_edismax";
         private int _start = 0;
         private int _rows = 10;
         private string _wt = "json";
 
-        private string _synonyms = "synonyms=true";
-
-        //private string[] _escapeChars = ["+", "-", "&&", "||", "!", "(", ")", "{", "}", "[", "]", "^",  "~", "*", "?", ":"];
+        private const string _synonyms = "synonyms=true";
 
         private readonly List<SolrField> _qfields = new List<SolrField>();
 
@@ -31,7 +26,7 @@ namespace SolrSearch.SolrQuery
         public bool IsScored { get; set; }
         public bool IsFaceted { get; set; }
 
-        public SolrQuery(int start = 0, int rows = 100, string wt = "json")
+        public FluentSolrQuery(int start = 0, int rows = 100, string wt = "json")
         {
             _queryTerms = new List<string> {_version, _synonyms, _deftype};
 
@@ -42,32 +37,32 @@ namespace SolrSearch.SolrQuery
             _returnFields.Add("*");
         }
 
-        public SolrQuery Skip(int start) { _start = start; return this; }
-        public SolrQuery Take(int rows) { _rows = rows; return this; }
-        public SolrQuery ResponseFormat(string wt) { _wt = wt; return this; }
+        public FluentSolrQuery Skip(int start) { _start = start; return this; }
+        public FluentSolrQuery Take(int rows) { _rows = rows; return this; }
+        public FluentSolrQuery ResponseFormat(string wt) { _wt = wt; return this; }
 
-        public SolrQuery SearchFor(string term = "*")
+        public FluentSolrQuery SearchFor(string term = "*")
         {
             _queryTerms.Add("q=" + term);
 
             return this;
         }
 
-        public SolrQuery SearchFuzzy(string term = "*", double proximity = .7)
+        public FluentSolrQuery SearchFuzzy(string term = "*", double proximity = .7)
         {
             _queryTerms.Add("q=" + term.ToLower() + "~" + proximity);
 
             return this;
         }
 
-        public SolrQuery InFields(List<SolrField> fields)
+        public FluentSolrQuery InFields(List<SolrField> fields)
         {
             fields.ForEach(f => _qfields.Add(f));
 
             return this;
         }
 
-        public SolrQuery In(string field, List<string> values)
+        public FluentSolrQuery In(string field, List<string> values)
         {
             string q = "fq=" + field + ":(" + string.Join(" ", values) + ")";
             _queryTerms.Add(q);
@@ -75,13 +70,13 @@ namespace SolrSearch.SolrQuery
             return this;
         }
 
-        public SolrQuery FilterQuery(string filter)
+        public FluentSolrQuery FilterQuery(string filter)
         {
             _queryTerms.Add("fq=" + filter);
             return this;
         }
 
-        public SolrQuery NegativeFilterQuery(IEnumerable<string> filterList, IEnumerable<SolrField> fieldList)
+        public FluentSolrQuery NegativeFilterQuery(IEnumerable<string> filterList, IEnumerable<SolrField> fieldList)
         {
             foreach (var curr in fieldList.Select(x => x.Name))
             {
@@ -90,31 +85,31 @@ namespace SolrSearch.SolrQuery
             return this;
         }
 
-        public SolrQuery AfterDate(DateTime after, string field)
+        public FluentSolrQuery AfterDate(DateTime after, string field)
         {
             _queryTerms.Add("fq=" + field + ":[" + after.ToSolrDate() + "+TO+*]");
             return this;
         }
 
-        public SolrQuery BeforeDate(DateTime before, string field)
+        public FluentSolrQuery BeforeDate(DateTime before, string field)
         {
             _queryTerms.Add("fq=" + field + ":[0001-01-01T00:00:00Z+TO+" + before.ToSolrDate() + "]");
             return this;
         }
 
-        public SolrQuery BetweenDates(DateTime start, DateTime end, string field)
+        public FluentSolrQuery BetweenDates(DateTime start, DateTime end, string field)
         {
             _queryTerms.Add("fq=" + field + ":[" + start.ToSolrDate() + "+TO+" + end.ToSolrDate() + "]");
             return this;
         }
 
-        public SolrQuery Range(object start, object end, string field)
+        public FluentSolrQuery Range(object start, object end, string field)
         {
             _queryTerms.Add("fq=" + field + ":[" + start.ToString() + "+TO+" + end.ToString() + "]");
             return this;
         }
 
-        public SolrQuery GeoFilter(string field, double latitude, double longitude, double proximity)
+        public FluentSolrQuery GeoFilter(string field, double latitude, double longitude, double proximity)
         {
             string fq = "fq={!geofilt sfield=" + field + "}";
             fq += "&pt=" + latitude + "," + longitude;
@@ -125,7 +120,7 @@ namespace SolrSearch.SolrQuery
             return this;
         }
 
-        public SolrQuery GroupBy(string field, string sortBy = "score desc", int limit = 1, bool flatten = true)
+        public FluentSolrQuery GroupBy(string field, string sortBy = "score desc", int limit = 1, bool flatten = true)
         {
             string term = "group=true&group.field=" + field;
             term += flatten ? "&group.main=true" : "";
@@ -136,7 +131,7 @@ namespace SolrSearch.SolrQuery
             return this;
         }
 
-        public SolrQuery ReturnFields(List<string> fields)
+        public FluentSolrQuery ReturnFields(List<string> fields)
         {
             fields.Remove("*");
             fields.ForEach(field => _returnFields.Add(field));
@@ -144,7 +139,7 @@ namespace SolrSearch.SolrQuery
             return this;
         }
 
-        public SolrQuery ScoreDocs()
+        public FluentSolrQuery ScoreDocs()
         {
             this.IsScored = true;
             _returnFields.Add("score");
@@ -152,7 +147,7 @@ namespace SolrSearch.SolrQuery
             return this;
         }
 
-        public SolrQuery FacetOn(List<string> fields)
+        public FluentSolrQuery FacetOn(List<string> fields)
         {
             this.IsFaceted = true;
 
@@ -163,21 +158,21 @@ namespace SolrSearch.SolrQuery
             return this;
         }
 
-        public SolrQuery ShowMoreLike(string field)
+        public FluentSolrQuery ShowMoreLike(string field)
         {
             _queryTerms.Add("mlt=true&mlt.fl=" + field);
 
             return this;
         }
 
-        public SolrQuery BoostNewDocuments(string field = "CreatedOn")
+        public FluentSolrQuery BoostNewDocuments(string field = "CreatedOn")
         {
             _queryTerms.Add("bf=recip(abs(ms(NOW/DAY," + field + ")),1,6.3E10,6.3E10)");
 
             return this;
         }
 
-        public SolrQuery BoostFun(string fieldOrFunction)
+        public FluentSolrQuery BoostFun(string fieldOrFunction)
         {
             _queryTerms.Add("bf=" + fieldOrFunction);
 
